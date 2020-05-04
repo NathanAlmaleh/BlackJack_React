@@ -2,38 +2,6 @@ import React from "react";
 import Cardview from "./Cardview";
 
 class Player extends React.Component {
-  /*
-  DealerCards = props => {
-    let firstCard = "Undefined";
-    let backCard ="Undefined";
-    
-    if (this.props.playerFinish) {
-      console.log(this.props.dealerCards)
-      firstCard = this.props.dealerCards.map((item, i) => {
-        return <Cardview key={i ^ 2} cardURL={item.image} />;
-      });
-    } else {
-      firstCard = <Cardview key={0} cardURL={this.props.dealerCards[0].image} />;
-      backCard = (
-        <img
-          key={1}
-          className="cardBox"
-          src="img/backCardImg.jpg"
-          alt="back_card"
-        />
-      );
-      return [firstCard, backCard];
-    }
-
-    return (
-      <div>
-        <div> {this.firstCard} </div>
-        <div> {this.backCard} </div>
-      </div>
-    );
-  };
-*/
-
   showCards(props) {
     let backCard = "Undefined";
     let firstCard = (
@@ -56,7 +24,16 @@ class Player extends React.Component {
     return (
       <div>
         <div className="deckBox">
-          <div className="sumCircle">{this.props.dealerSum}</div>
+          <div
+            className="sumCircle"
+            style={
+              this.props.playerFinish
+                ? { display: "block" }
+                : { display: "none" }
+            }
+          >
+            {this.props.dealerSum}
+          </div>
           {this.showCards()}
         </div>
       </div>

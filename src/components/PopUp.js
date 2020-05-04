@@ -1,5 +1,4 @@
 import React from "react";
-import { Link } from "react-router-dom";
 
 import Dealer from "./Dealer";
 import Player from "./Player";
@@ -9,12 +8,7 @@ class PopUp extends React.Component {
     return (
       <div className="popupBox">
         <div>
-          <h1>The Winner is !! {this.props.winner}</h1>
-
-          <div>
-            <h1>Dealer:{this.props.dealerSum}</h1>{" "}
-            <h1>Player:{this.props.playerSum}</h1>
-          </div>
+          <h1>The Winner is: {this.props.winner} !!</h1>
         </div>
 
         <div className="tableBox">
@@ -32,11 +26,10 @@ class PopUp extends React.Component {
             />
           </div>
         </div>
-        <Link to="/">
-          <div>
-            <button className="optionButton">Replay</button>
-          </div>
-        </Link>
+
+        <div>
+          <button className="optionButton">Replay</button>
+        </div>
       </div>
     );
   }

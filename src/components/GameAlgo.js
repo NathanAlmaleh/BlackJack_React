@@ -3,7 +3,6 @@ import Options from "./Options";
 import Dealer from "./Dealer";
 import Player from "./Player";
 import Loading from "./Loading";
-import PopUp from "./PopUp";
 
 class GameAlgo extends React.Component {
   constructor() {
@@ -11,8 +10,9 @@ class GameAlgo extends React.Component {
     this.state = {
       LoadAPI: false,
       playerFinish: false,
+      dealerFinish: false,
+      playerWin: false,
       restartGame: false,
-      winner: "",
       dealerSum: 0,
       playerSum: 0,
       playerCards: [],
@@ -24,6 +24,7 @@ class GameAlgo extends React.Component {
     this.fetchCards("player", this.props.amount);
     this.fetchCards("dealer", this.props.amount);
   }
+
   fetchCards(cardHolder, cardsAmount) {
     fetch(
       `https://deckofcardsapi.com/api/deck/${
@@ -76,12 +77,13 @@ class GameAlgo extends React.Component {
         let val = this.cardValue(stVal, type);
         sum += val;
       }
-      this.setState({ dealerSum: sum });
+      this.setState({ dealerSum: sum }, () => {
+        this.dealerToggleController();
+      });
     }
   }
 
   cardValue(cardVal, type) {
-    console.log(cardVal);
     let val = parseInt(cardVal, 10);
     if (val < 11) return val;
     //need to check the ACE value
@@ -90,12 +92,14 @@ class GameAlgo extends React.Component {
       switch (type) {
         case "player":
           sum = this.state.playerSum;
-          if (sum + 11 > 21) return 1;
+          if (sum === 10) return 11;
+          else if (sum + 11 > 21) return 1;
           else return 11;
 
         case "dealer":
           sum = this.state.dealerSum;
-          if (sum + 11 > 21) return 1;
+          if (sum === 10) return 11;
+          else if (sum + 11 > 21) return 1;
           else return 11;
 
         default:
@@ -104,78 +108,85 @@ class GameAlgo extends React.Component {
     }
     return 10;
   }
-  //Toggles
+  //TOGGLES:
+  //TODO: 
   playerFinishToggle() {
     this.setState(
       {
         playerFinish: true
-      },
-      () => {
-        this.dealerTurn();
-        this.dealerToggleController();
+      }, () => { this.dealerTurn();
       }
     );
   }
-  dealerTurn() {
-    let dealerSum = this.state.dealerSum;
-    let playerSum = this.state.playerSum;
-
-    if (playerSum > 21 || dealerSum >= playerSum) {
-      //player lost restart game
-      this.setState({
-        restartGame: true,
-        winner: "House"
-      });
-    }
-    //else if (dealerSum <= 17) this.fetchCards("dealer", 1);
-    else if (dealerSum <= 17) this.fetchCards("dealer", 1);
+  //TODO: after calculates all cards & dealer is done
+  //      checks if player wins else restart game
+  dealerFinishToggle() {
+    this.setState(
+      { dealerFinish: true },
+      this.state.playerSum > this.state.dealerSum
+        ? this.setState({ playerWin: true }, this.restartToggle())
+        : this.restartToggle()
+    );
   }
 
+  //TODO: draw cards until dealerSum <= 17
+  dealerTurn() {
+    let dealerSum = this.state.dealerSum;
+
+    if (dealerSum <= 17) {
+      this.fetchCards("dealer", 1);
+    } else this.dealerToggleController();
+  }
+
+  //TODO: update restartGame=true & sets the delay acordingly
+  restartToggle() {
+    setTimeout(
+      () =>
+        this.setState({
+          restartGame: true
+        }),
+      this.state.playerWin ? 3500 : 2000
+    );
+  }
+
+  //TODO: checks if dealer won AFTER playerFinish=true
+  //      & call dealerFinishToggle
   dealerToggleController() {
     let dealerSum = this.state.dealerSum;
     let playerSum = this.state.playerSum;
 
-    console.log(dealerSum, playerSum);
-    // while(dealerSum<playerSum){
-
-    //   this.fetchCards("dealer", 1);
-    // }
-
-    if (playerSum > 21) {
-      console.log("Dealer win!!");
-      this.setState({
-        restartGame: true,
-        winner: "House"
-      });
-    } else if (dealerSum > playerSum && dealerSum < 22) {
-      console.log("Dealer win!!");
-      this.setState({
-        restartGame: true,
-        winner: "House"
-      });
-    } else if (dealerSum === playerSum) {
-      console.log("no Winners!");
-      this.setState({
-        restartGame: true,
-        winner: "No winners!!"
-      });
-    } else {
-      console.log("House Lose!");
-      this.setState({
-        restartGame: true,
-        winner: "Player"
-      });
+    if (this.state.playerFinish) {
+      console.log(
+        "player: " +
+          this.state.playerSum +
+          " > dealer: " +
+          this.state.dealerSum +
+          " ?"
+      );
+      if (playerSum > 21) {
+        console.log("Dealer win!!");
+        this.dealerFinishToggle();
+      } else if (dealerSum > playerSum && dealerSum < 22) {
+        console.log("Dealer win!!");
+        this.dealerFinishToggle();
+      } else if (dealerSum === playerSum) {
+        console.log("no Winners!");
+        this.dealerFinishToggle();
+      }
+      else this.dealerFinishToggle();
     }
   }
+
+  //TODO: 
   playerToggleController() {
     let playerSum = this.state.playerSum;
 
     if (playerSum > 21) {
-      this.playerFinishToggle();
       console.log("Player Lost!");
-    } else if (playerSum === 21) {
       this.playerFinishToggle();
+    } else if (playerSum === 21) {
       console.log("Player Winner!");
+      this.playerFinishToggle();
     }
   }
   // click-Action
@@ -194,6 +205,14 @@ class GameAlgo extends React.Component {
       if (this.state.LoadAPI) {
         return (
           <div className="tableBox">
+            <div
+              className="popupBackground"
+              style={
+                this.state.playerWin
+                  ? { display: "block" }
+                  : { display: "none" }
+              }
+            />
             <div>
               <Dealer
                 dealerCards={this.state.dealerCards}
@@ -220,16 +239,7 @@ class GameAlgo extends React.Component {
         return <Loading />;
       }
     } else {
-      return (
-        <PopUp
-          winner={this.state.winner}
-          dealerSum={this.state.dealerSum}
-          dealerCards={this.state.dealerCards}
-          playerFinish={this.state.playerFinish}
-          playerSum={this.state.playerSum}
-          playerCards={this.state.playerCards}
-        />
-      );
+      return <GameAlgo id={this.props.id} amount={2} />;
     }
   }
 }
