@@ -134,7 +134,7 @@ class GameAlgo extends React.Component {
   dealerTurn() {
     let dealerSum = this.state.dealerSum;
 
-    if (dealerSum <= 17) {
+    if (dealerSum <= 17 && dealerSum < this.state.playerSum) {
       this.fetchCards("dealer", 1);
     } else this.dealerToggleController();
   }
@@ -146,7 +146,7 @@ class GameAlgo extends React.Component {
         this.setState({
           restartGame: true
         }),
-      this.state.playerWin ? 4500 : 2000
+      this.state.playerWin ? 5500 : 3000
     );
   }
 
@@ -203,8 +203,10 @@ class GameAlgo extends React.Component {
     console.log("player stand");
     this.playerFinishToggle();
   }
-
-  split() {}
+  //TODO: split button
+  split() {
+    console.log("player requested split");
+  }
 
   render() {
     if (!this.state.restartGame) {
@@ -239,6 +241,7 @@ class GameAlgo extends React.Component {
               <Options
                 stand={() => this.stand()}
                 hit={() => this.hitCard()}
+                split={() => this.split()}
                 playerFinish={this.state.playerFinish}
               />
             </div>
