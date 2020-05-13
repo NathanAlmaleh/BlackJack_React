@@ -78,7 +78,7 @@ class GameAlgo extends React.Component {
         sum += val;
       }
       this.setState({ dealerSum: sum }, () => {
-        this.dealerToggleController();
+        this.dealerTurn();
       });
     }
   }
@@ -86,7 +86,7 @@ class GameAlgo extends React.Component {
   cardValue(cardVal, type) {
     let val = parseInt(cardVal, 10);
     if (val < 11) return val;
-    //need to check the ACE value
+    //TODO: calculate ACE value
     else if (cardVal === "ACE") {
       let sum;
       switch (type) {
@@ -108,8 +108,19 @@ class GameAlgo extends React.Component {
     }
     return 10;
   }
-  //Toggles
+  //TOGGLES:
+  //TODO: sets playerFinish=true & calls dealerTurn()
   playerFinishToggle() {
+    this.setState({ playerFinish: true }, () => {
+      this.dealerTurn();
+    });
+  }
+
+  //TODO: after calculates all cards & dealer is done
+  //      checks if player wins else restart game
+  dealerFinishToggle() {
+    const playerSum = this.state.playerSum;
+    const dealerSum = this.state.dealerSum;
     this.setState(
       {
         playerFinish: true
@@ -122,19 +133,21 @@ class GameAlgo extends React.Component {
   //TODO: after calculates all cards & dealer is done
   //      checks if player wins else restart game
   dealerFinishToggle() {
+    const playerSum = this.state.playerSum;
+    const dealerSum = this.state.dealerSum;
     this.setState(
       { dealerFinish: true },
-      this.state.playerSum > this.state.dealerSum
-        ? this.setState({ playerWin: true }, this.restartToggle())
+      playerSum <= 21 && (playerSum > dealerSum || dealerSum > 21)
+        ? this.setState({ playerWin: true }, this.restartToggle()) &&
+            console.log("player wins!")
         : this.restartToggle()
     );
   }
-
   //TODO: draw cards until dealerSum <= 17
   dealerTurn() {
     let dealerSum = this.state.dealerSum;
 
-    if (dealerSum <= 17) {
+    if (dealerSum <= 17 && dealerSum < this.state.playerSum) {
       this.fetchCards("dealer", 1);
     } else this.dealerToggleController();
   }
@@ -146,7 +159,7 @@ class GameAlgo extends React.Component {
         this.setState({
           restartGame: true
         }),
-      this.state.playerWin ? 3500 : 2000
+      this.state.playerWin ? 5500 : 3000
     );
   }
 
@@ -157,6 +170,7 @@ class GameAlgo extends React.Component {
     let playerSum = this.state.playerSum;
 
     if (this.state.playerFinish) {
+      console.log(this.state);
       console.log(
         "player: " +
           this.state.playerSum +
@@ -177,6 +191,9 @@ class GameAlgo extends React.Component {
       else this.dealerFinishToggle();
     }
   }
+
+  //TODO: checks playerSum status and terminiates turn
+  //      when loses/wins by 21
   playerToggleController() {
     let playerSum = this.state.playerSum;
 
@@ -188,16 +205,21 @@ class GameAlgo extends React.Component {
       this.playerFinishToggle();
     }
   }
-  // click-Action
+
+  //TODO: click-Action
   hitCard() {
     console.log("player requested hit");
     if (this.state.playerSum < 21) this.fetchCards("player", 1);
   }
+  //TODO: stand button
   stand() {
     console.log("player stand");
     this.playerFinishToggle();
   }
-  split() {}
+  //TODO: split button
+  split() {
+    console.log("player requested split");
+  }
 
   render() {
     if (!this.state.restartGame) {
@@ -211,7 +233,10 @@ class GameAlgo extends React.Component {
                   ? { display: "block" }
                   : { display: "none" }
               }
-            />
+            >
+              <h1> Winner !!! </h1>
+            </div>
+
             <div>
               <Dealer
                 dealerCards={this.state.dealerCards}
@@ -229,6 +254,7 @@ class GameAlgo extends React.Component {
               <Options
                 stand={() => this.stand()}
                 hit={() => this.hitCard()}
+                split={() => this.split()}
                 playerFinish={this.state.playerFinish}
               />
             </div>
