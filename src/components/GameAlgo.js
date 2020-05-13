@@ -234,7 +234,7 @@ class GameAlgo extends React.Component {
                   : { display: "none" }
               }
             >
-              <h1> Winner !!! </h1>
+              <h3> Winner !!! </h3>
             </div>
 
             <div>

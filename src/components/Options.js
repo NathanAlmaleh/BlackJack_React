@@ -20,6 +20,7 @@ class Options extends React.Component {
           {" "}
           Stand{" "}
         </button>
+      {/* 
         <button
           disabled={this.props.playerFinish}
           onClick={this.props.split}
@@ -28,6 +29,7 @@ class Options extends React.Component {
           {" "}
           Split{" "}
         </button>
+        */}
       </div>
     );
   }
