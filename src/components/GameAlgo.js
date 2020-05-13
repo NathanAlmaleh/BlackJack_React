@@ -221,6 +221,28 @@ class GameAlgo extends React.Component {
     console.log("player requested split");
   }
 
+  renderResult(){
+    if(this.state.dealerFinish){
+    if(this.state.playerWin){
+      return(
+        <div
+            className="popupBackground"
+            style={
+              this.state.playerWin
+                ? { display: "block" }
+                : { display: "none" }
+            }
+          >
+            <h3 style={{color: "yellow"}}> Winner !!! </h3>
+      </div>
+      )
+    }
+    else {
+      return (<h3 style={{color: "red"}}>You lost</h3>)
+    }
+    }
+  }
+
   render() {
     if (!this.state.restartGame) {
       if (this.state.LoadAPI) {
@@ -234,9 +256,9 @@ class GameAlgo extends React.Component {
                   : { display: "none" }
               }
             >
-              <h3> Winner !!! </h3>
+              <h3 > Winner !!! </h3>
             </div>
-
+            {this.renderResult()}
             <div>
               <Dealer
                 dealerCards={this.state.dealerCards}
